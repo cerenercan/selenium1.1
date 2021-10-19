@@ -10,13 +10,18 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class AppTest {
 
     WebDriver driver;
+    WebDriverWait wait;
 
     @Before
     public void setup() {
@@ -25,6 +30,7 @@ public class AppTest {
         options.addArguments("start-maximized");
 
         driver = new ChromeDriver(options);
+        wait = new WebDriverWait(driver, Duration.ofSeconds(30));
         driver.get("https://www.google.com/");
     }
 
@@ -53,7 +59,7 @@ public class AppTest {
         String currentWindow = driver.getWindowHandle();
 
         driver.findElement(By.id("tabButton")).click();
-
+        wait.until(ExpectedConditions.numberOfWindowsToBe(2));
         Set<String> windowHandles = driver.getWindowHandles();
         for (String window : windowHandles) {
             if (!currentWindow.equals(window)){
@@ -61,7 +67,27 @@ public class AppTest {
             }
         }
         TimeUnit.SECONDS.sleep(5);
-        System.out.println("New window text: " + driver.findElement(By.id("sampleHeading")).getText());
+        System.out.println("New window text: " + findElement(By.id("sampleHeading")).getText());
+        driver.close();
+        driver.switchTo().window(currentWindow);
+        findElement(By.id("messageWindowButton")).click();
+        TimeUnit.SECONDS.sleep(5);
+    }
+
+    @Test
+    public void selectTest() throws InterruptedException {
+        driver.navigate().to("https://www.n11.com/uye-ol");
+        Select select = new Select(findElement(By.id("birthDay")));
+
+        TimeUnit.SECONDS.sleep(5);
+
+        select.selectByVisibleText("6");
+
+        TimeUnit.SECONDS.sleep(5);
+    }
+
+    public WebElement findElement(By by){
+        return wait.until(ExpectedConditions.presenceOfElementLocated(by));
     }
 
     @After
